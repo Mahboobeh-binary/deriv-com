@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   k8s: circleci/kubernetes@0.7.0
+  s3: circleci/aws-s3@1.0.13
 commands:
   git_checkout_from_cache:
     description: "Git checkout and save cache"
@@ -28,8 +29,8 @@ commands:
           key: source-v1-{{ .Branch }}-{{ .Revision }}
           paths:
             - ".git"
-  npm_install:
-    description: "Install npm modules"
+  npm_install_from_cache:
+    description: "npm install and save cache"
     steps:
       - restore_cache:
           keys:
@@ -42,7 +43,7 @@ commands:
           key: node-{{ checksum "package-lock.json" }}
           paths:
             - "node_modules"
-  test:
+  npm_test:
     description: "Run npm test"
     steps:
       - run:
@@ -54,32 +55,39 @@ commands:
       - run:
           name: "Run build"
           command: npm run build
-  deploy:
-    description: "Deploy to static branches"
-    parameters:
-      target_branch:
-        type: string
+  compress:
+    description: "Compress"
     steps:
-      - checkout
-      - attach_workspace:
-          at: www
       - run:
-          name: Tag build
-          command: echo "<< parameters.target_branch >> $(date)" > www/version
-      - run:
-          name: Install and configure dependencies
+          name: "Compress"
           command: |
-            sudo npm install -g gh-pages@2.0.1
-            git config user.email "ci-build@binary.com"
-            git config user.name "ci-build"
-      - add_ssh_keys:
-          fingerprints:
-            - "01:67:4a:6d:26:9c:70:c4:1a:60:91:88:d9:dd:f0:83"
+            pushd public/
+            tar -cvf artifact.tar *
+            mv artifact.tar ${OLDPWD}/
       - run:
-          name: Deploy docs to gh-pages branch
-          command: gh-pages -d www --branch << parameters.target_branch >> --message '[skip ci]'
-  docker_build_push:
-    description: "Build and Push image to docker hub"
+          name: "Tag commit id as artifact identifer"
+          command: echo "${CIRCLE_TAG}" > artifact-info.txt
+  upload_artifact:
+    description: "upload build artifact to s3 bucket"
+    steps:
+      - s3/copy:
+          from: artifact.tar
+          to: 's3://${CONTEXT_ARTIFACT_S3_BUCKET}/${CIRCLE_PROJECT_REPONAME}/'
+          aws-access-key-id: env_CONTEXT_ARTIFACT_S3_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: env_CONTEXT_ARTIFACT_S3_AWS_SECRET_ACCESS_KEY
+          aws-region: env_CONTEXT_ARTIFACT_S3_AWS_REGION
+          arguments: '--metadata "{\"x-amz-artifact-id\": \"${CIRCLE_TAG}\" }"'
+  upload_checksum:
+    description: "upload artifact checksum to s3"
+    steps:
+      - s3/copy:
+          from: artifact-info.txt
+          to: 's3://${CONTEXT_ARTIFACT_S3_BUCKET}/${CIRCLE_PROJECT_REPONAME}/'
+          aws-access-key-id: env_CONTEXT_ARTIFACT_S3_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: env_CONTEXT_ARTIFACT_S3_AWS_SECRET_ACCESS_KEY
+          aws-region: env_CONTEXT_ARTIFACT_S3_AWS_REGION
+  docker_build:
+    description: "Build Docker image"
     parameters:
       docker_image_tag:
         type: string
@@ -91,6 +99,9 @@ commands:
           name: Building docker image
           command: |
             docker build -t ${DOCKHUB_ORGANISATION}/deriv-com:${CIRCLE_TAG} -t ${DOCKHUB_ORGANISATION}/deriv-com:<< parameters.docker_image_tag >> .
+  docker_push:
+    description: "Push image to docker hub"
+    steps:
       - run:
           name: Pushing Image to docker hub
           command: |
@@ -108,78 +119,103 @@ commands:
           name: Deploying to k8s cluster for service << parameters.k8s_svc_name >>
           command: |
             echo $CA_CRT | base64 --decode > ca.crt
-            kubectl --server=${KUBE_SERVER} --certificate-authority=ca.crt --token=$SERVICEACCOUNT_TOKEN set image deployment/<< parameters.k8s_svc_name >> << parameters.k8s_svc_name >>=${DOCKHUB_ORGANISATION}/deriv-com:${CIRCLE_SHA1}
+            kubectl --server=${KUBE_SERVER} --certificate-authority=ca.crt --token=$SERVICEACCOUNT_TOKEN set image deployment/<< parameters.k8s_svc_name >> << parameters.k8s_svc_name >>=${DOCKHUB_ORGANISATION}/deriv-com:${CIRCLE_TAG}
 jobs:
   test:
     docker:
-      - image: circleci/node:12.13.0-stretch
+      - image: circleci/node:lts-stretch
         environment:
           - GATSBY_CPU_COUNT=2
           - GATSBY_MAP_API_KEY=${GATSBY_MAP_API_KEY}
+          - GATSBY_ENV=staging
     steps:
       - git_checkout_from_cache
-      - npm_install
-      - test
+      - npm_install_from_cache
+      - npm_test
       - build
-  release_beta:
+  build_staging:
     docker:
-      - image: circleci/node:12.13.0-stretch
-    steps:
-      - git_checkout_from_cache
-      - npm_install
-      - test
-      - build
-      - deploy:
-          target_branch: "staging"
-
-  release_production:
-    docker:
-      - image: circleci/node:12.13.0-stretch
-    steps:
-      - git_checkout_from_cache
-      - npm_install
-      - test
-      - build
-      - deploy:
-          target_branch: "production"
-  release_aws_production:
-    docker:
-      - image: circleci/node:12.13.0-stretch
+      - image: circleci/node:lts-stretch
         environment:
           - GATSBY_CPU_COUNT=2
           - GATSBY_MAP_API_KEY=${GATSBY_MAP_API_KEY}
+          - GATSBY_ENV=staging
     steps:
       - git_checkout_from_cache
-      - npm_install
-      - test
+      - npm_install_from_cache
+      - npm_test
       - build
-      - docker_build_push:
+      - docker_build
+      - docker_push
+  build_production:
+    docker:
+      - image: circleci/node:lts-stretch
+        environment:
+          - GATSBY_CPU_COUNT=2
+          - GATSBY_MAP_API_KEY=${GATSBY_MAP_API_KEY}
+          - GATSBY_ENV=production
+    steps:
+      - git_checkout_from_cache
+      - npm_install_from_cache
+      - npm_test
+      - build
+      - compress
+      - upload_artifact  # uploading the built code to s3 to create a backup of key services separate from Kubernetes deployment
+      - upload_checksum  # uploading compressed artifact checksum to cross match artifact fingerprint
+      - docker_build:
           docker_image_tag: latest
+      - docker_push
+  deploy_staging:
+    docker:
+      - image: circleci/node:lts-stretch
+    steps:
+      - k8s_deploy
+  deploy_production:
+    docker:
+      - image: circleci/node:lts-stretch
+    steps:
       - k8s_deploy:
           k8s_svc_name: "production-deriv-com"
 workflows:
-  test:
+  build_and_push_dev:
     jobs:
       - test:
           filters:
             branches:
-              ignore: /^master$/
-  release:
+              only: /^dev/
+  build_deploy_staging:
     jobs:
-      - release_beta:
-          filters:
-            branches:
-              only: /^master$/
-      - release_production:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^production.*/
-      - release_aws_production:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^production.*/
+      - build_staging:
           context: binary-frontend-artifact-upload
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^staging.*/
+      - deploy_staging:
+          context: binary-frontend-artifact-upload
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^staging.*/
+          requires:
+            - build_staging
+  build_deploy_production:
+    jobs:
+      - build_production:
+          context: binary-frontend-artifact-upload
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^production.*/
+      - deploy_production:
+          context: binary-frontend-artifact-upload
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^production.*/
+          requires:
+            - build_production
