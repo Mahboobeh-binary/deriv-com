@@ -69,7 +69,7 @@ commands:
       - run:
           name: Install and configure dependencies
           command: |
-            sudo yarn install -g gh-pages@2.0.1
+            sudo npm install -g gh-pages@2.0.1
             git config user.email "ci-build@binary.com"
             git config user.name "ci-build"
       - add_ssh_keys:
