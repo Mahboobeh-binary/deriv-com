@@ -54,7 +54,7 @@ commands:
       - run:
           name: "Run build"
           command: npm run build
-  deploy:	
+  deploy:
     description: "Deploy to static branches"	
     parameters:	
       target_branch:	
