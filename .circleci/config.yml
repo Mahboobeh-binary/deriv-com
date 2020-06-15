@@ -112,7 +112,7 @@ commands:
 jobs:
   test:
     docker:
-      - image: circleci/node:lts-stretch
+      - image: circleci/node:8.10.0-stretch
         environment:
           - GATSBY_CPU_COUNT=2
           - GATSBY_MAP_API_KEY=${GATSBY_MAP_API_KEY}
@@ -123,7 +123,7 @@ jobs:
       - build
   release_beta:
     docker:
-      - image: circleci/node:lts-stretch
+      - image: circleci/node:8.10.0-stretch
     steps:
       - git_checkout_from_cache
       - npm_install
@@ -134,7 +134,7 @@ jobs:
 
   release_production:
     docker:
-      - image: circleci/node:lts-stretch
+      - image: circleci/node:8.10.0-stretch
     steps:
       - git_checkout_from_cache
       - npm_install
@@ -144,7 +144,7 @@ jobs:
           target_branch: "production"
   release_aws_production:
     docker:
-      - image: circleci/node:lts-stretch
+      - image: circleci/node:8.10.0-stretch
         environment:
           - GATSBY_CPU_COUNT=2
           - GATSBY_MAP_API_KEY=${GATSBY_MAP_API_KEY}
