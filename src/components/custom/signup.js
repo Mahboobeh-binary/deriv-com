@@ -1,5 +1,6 @@
-import PropTypes from 'prop-types'
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+import { graphql, StaticQuery } from 'gatsby'
 import styled from 'styled-components'
 import Cookies from 'js-cookie'
 import { Box } from 'components/containers'
@@ -13,12 +14,17 @@ import SignupFlat from 'components/custom/_signup-flat'
 import SignupNew from 'components/custom/_signup-new'
 import SignupPublic from 'components/custom/_signup-public'
 import SignupSimple from 'components/custom/_signup-simple'
-import { Header, Image, StyledLink, Text } from 'components/elements'
+import { Header, QueryImage, StyledLink, Text } from 'components/elements'
 import { localize, Localize } from 'components/localization'
+import device from 'themes/device.js'
 
 const Form = styled.form`
     height: 100%;
-    background-color: ${props => props.bgColor || 'var(--color-white)'};
+    background-color: ${(props) => props.bgColor || 'var(--color-white)'};
+
+    @media ${device.mobileL} {
+        width: 100%;
+    }
 `
 const ResponseWrapper = styled.div`
     justify-content: center;
@@ -27,10 +33,7 @@ const ResponseWrapper = styled.div`
     flex-direction: column;
     padding: 2rem 1rem;
 `
-const EmailImgWrapper = styled(Box)`
-    display: flex;
-    justify-content: center;
-`
+
 const EmailLink = styled(StyledLink)`
     display: table;
     font-size: 1.4rem;
@@ -40,7 +43,7 @@ const EmailLink = styled(StyledLink)`
     text-align: center;
 `
 
-const validateEmail = email => {
+const validateEmail = (email) => {
     const error_message = validation.email(email)
 
     return error_message
@@ -62,15 +65,15 @@ class Signup extends Component {
         submit_status: '',
         submit_error_msg: '',
     }
-    handleValidation = param => {
+    handleValidation = (param) => {
         const message = typeof param === 'object' ? param.target.value : param
 
         this.setState({
-            email_error_msg: validateEmail(message),
+            email_error_msg: validateEmail(message.replace(/\s/g, '')),
         })
     }
 
-    handleInputChange = e => {
+    handleInputChange = (e) => {
         const { name, value } = e.target
 
         this.setState({
@@ -79,7 +82,7 @@ class Signup extends Component {
         this.handleValidation(value)
     }
 
-    getVerifyEmailRequest = email => {
+    getVerifyEmailRequest = (email) => {
         const utm_data = TrafficSource.getData()
         const affiliate_token = Cookies.getJSON('affiliate_tracking')
         const signup_device = LocalStore.get('signup_device')
@@ -105,11 +108,11 @@ class Signup extends Component {
         }
     }
 
-    handleEmailSignup = e => {
+    handleEmailSignup = (e) => {
         e.preventDefault()
         this.setState({ is_submitting: true })
-        const { email, email_error_msg } = this.state
-
+        let { email, email_error_msg } = this.state
+        email = email.replace(/\s/g, '')
         this.handleValidation(email)
         const has_error_email = validateEmail(email)
 
@@ -118,8 +121,15 @@ class Signup extends Component {
         }
 
         const verify_email_req = this.getVerifyEmailRequest(email)
-        BinarySocketBase.send(verify_email_req).then(response => {
+        const binary_socket = BinarySocketBase.init()
+
+        binary_socket.onopen = () => {
+            binary_socket.send(JSON.stringify(verify_email_req))
+        }
+        binary_socket.onmessage = (msg) => {
+            const response = JSON.parse(msg.data)
             if (response.error) {
+                binary_socket.close()
                 return this.setState({
                     is_submitting: false,
                     submit_status: 'error',
@@ -132,17 +142,18 @@ class Signup extends Component {
                 submit_status: 'success',
             })
             if (this.props.onSubmit) this.props.onSubmit(this.state.submit_status)
-        })
+            binary_socket.close()
+        }
     }
 
     clearEmail = () => this.setState({ email: '', email_error_msg: '' })
 
-    handleSocialSignup = e => {
+    handleSocialSignup = (e) => {
         e.preventDefault()
         Login.initOneAll(e.currentTarget.id)
     }
 
-    handleLogin = e => {
+    handleLogin = (e) => {
         e.preventDefault()
         Login.redirectToLogin()
     }
@@ -192,9 +203,20 @@ class Signup extends Component {
                         <Header as="h3" align="center" weight="normal">
                             {localize('Check your email')}
                         </Header>
-                        <EmailImgWrapper width="100%" mt="1rem" mb="1.6rem">
-                            <Image img_name="view-email.png" alt="Email image" width="80%" />
-                        </EmailImgWrapper>
+                        <StaticQuery
+                            query={graphql`
+                                query {
+                                    view_email: file(relativePath: { eq: "view-email.png" }) {
+                                        ...fadeIn
+                                    }
+                                }
+                            `}
+                            render={(data) => (
+                                <Box m="3.2rem 0">
+                                    <QueryImage data={data.view_email} alt="Email image" />
+                                </Box>
+                            )}
+                        />
                         <Text align="center">
                             <Localize
                                 translate_text="We've sent a message to {{email}} with a link to activate your account."

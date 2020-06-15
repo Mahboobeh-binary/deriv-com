@@ -34,9 +34,24 @@ const AccordionHeader = styled.div`
         @media ${device.tabletL} {
             font-size: var(--text-size-sm);
         }
+        @media ${device.mobileM} {
+            font-size: var(--text-size-s);
+        }
+    }
+    svg {
+        @media ${device.mobileL} {
+            width: 1.6rem;
+            height: 1.6rem;
+        }
     }
     &:hover {
         cursor: pointer;
+    }
+`
+const ResponsiveWrapper = styled.div`
+    @media ${device.tablet} {
+        margin-left: 1.6rem;
+        margin-right: 1.6rem;
     }
 `
 
@@ -87,7 +102,7 @@ const SingleAccordionContent = ({ is_default_open = false, nodes, children }) =>
         React.useEffect(() => setHeight(getHeight(child_idx)), [is_expanded])
 
         return (
-            <div
+            <ResponsiveWrapper
                 key={child_idx}
                 style={child.props.parent_style}
                 ref={(div) => {
@@ -102,17 +117,19 @@ const SingleAccordionContent = ({ is_default_open = false, nodes, children }) =>
                         style={child.props.header_style}
                     >
                         <Text weight="bold">{child.props.header}</Text>
-                        {child.props.plus ? (
-                            is_expanded ? (
-                                <Minus />
+                        <div>
+                            {child.props.plus ? (
+                                is_expanded ? (
+                                    <Minus />
+                                ) : (
+                                    <Plus />
+                                )
+                            ) : child.props.arrow_thin ? (
+                                <Arrow expanded={is_expanded ? 'true' : 'false'} />
                             ) : (
-                                <Plus />
-                            )
-                        ) : child.props.arrow_thin ? (
-                            <Arrow expanded={is_expanded ? 'true' : 'false'} />
-                        ) : (
-                            <ThickArrow expanded={is_expanded ? 'true' : 'false'} />
-                        )}
+                                <ThickArrow expanded={is_expanded ? 'true' : 'false'} />
+                            )}
+                        </div>
                     </AccordionHeader>
                     <div
                         style={{
@@ -125,7 +142,7 @@ const SingleAccordionContent = ({ is_default_open = false, nodes, children }) =>
                         {child}
                     </div>
                 </AccordionWrapper>
-            </div>
+            </ResponsiveWrapper>
         )
     })
 

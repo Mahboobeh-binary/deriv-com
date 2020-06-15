@@ -10,8 +10,12 @@ import { Localize, localize, WithIntl } from 'components/localization'
 import DemoIcon from 'images/svg/demo-account.svg'
 
 const Section = styled(SectionContainer)`
-    background-color: ${props => props.bgcolor || 'transparent'};
-    padding: ${props => props.padding || 'transparent'};
+    background-color: ${(props) => props.bgcolor || 'transparent'};
+    padding: ${(props) => props.padding || 'transparent'};
+`
+
+const StyledCard = styled(Card)`
+    height: auto;
 `
 const StyledHeader = styled(Header)`
     @media ${device.laptop} {
@@ -22,10 +26,10 @@ const StyledHeader = styled(Header)`
 const ListWrapper = styled.div`
     width: 50%;
     max-width: 48.7rem;
-    padding-left: ${props => props.pl || ''};
+    padding-left: ${(props) => props.pl || ''};
 
     @media ${device.laptop} {
-        margin-bottom: ${props => props.laptop_mb || ''};
+        margin-bottom: ${(props) => props.laptop_mb || ''};
         width: 100%;
     }
 `
@@ -89,6 +93,12 @@ const NewHeader = styled(Header)`
     margin: 2.4rem 0 0.8rem;
 `
 
+const ResponsiveHeader = styled(StyledHeader)`
+    @media ${device.mobileL} {
+        font-size: 5rem;
+    }
+`
+
 const ResponsibleTrading = () => {
     return (
         <Layout>
@@ -100,9 +110,9 @@ const ResponsibleTrading = () => {
             />
             <Section>
                 <Container direction="column">
-                    <StyledHeader as="h1" align="center" pb="1.6rem">
+                    <ResponsiveHeader as="h1" align="center" pb="1.6rem">
                         {localize('Secure and responsible trading')}
-                    </StyledHeader>
+                    </ResponsiveHeader>
                     <StyledText size="var(--text-size-m)" align="center">
                         {localize(
                             'Trading online can be exciting, but it’s important to be reminded that there are risks involved. We encourage all our users to secure their accounts and trade responsibly to experience the best in online trading.',
@@ -157,7 +167,7 @@ const ResponsibleTrading = () => {
                                     'Online trading is exciting but it can be addictive. There are various limits that you can set on your account to limit your trading activity.',
                                 )}
                             </TradingText>
-                            <Card width="100%" padding="3.2rem">
+                            <StyledCard width="100%" padding="3.2rem">
                                 <Text size="var(--text-size-sm)" weight="bold">
                                     {localize('You can:')}
                                 </Text>
@@ -191,7 +201,7 @@ const ResponsibleTrading = () => {
                                         </Text>
                                     </StyledList>
                                 </StyledUl>
-                            </Card>
+                            </StyledCard>
                         </ListWrapper>
                         <CustomListWrapper>
                             <StyledHeader as="h5" size="var(--text-size-header-2)" mb="3.2rem">
@@ -241,7 +251,7 @@ const ResponsibleTrading = () => {
                                         <StyledLink
                                             size="var(--text-size-s)"
                                             weight="bold"
-                                            to="contact-us"
+                                            to="/contact-us"
                                             key={0}
                                         />,
                                     ]}
@@ -252,20 +262,22 @@ const ResponsibleTrading = () => {
                 </Container>
             </Section>
             <Section padding="4rem 0">
-                <Flex ai="center" direction="column">
-                    <DemoIcon />
-                    <NewHeader as="h4" size="var(--text-size-header-1)" align="center">
-                        {localize('New to trading?')}
-                    </NewHeader>
-                    <StyledHeader as="h5" align="center" weight="400" lh="2.4rem" mb="4rem">
-                        {localize(
-                            'Use our demo account and learn how to trade by using risk-free virtual funds.',
-                        )}
-                    </StyledHeader>
-                    <LinkButton secondary="true" to="/signup/">
-                        {localize('Create demo account')}
-                    </LinkButton>
-                </Flex>
+                <Container>
+                    <Flex ai="center" direction="column">
+                        <DemoIcon />
+                        <NewHeader as="h4" size="var(--text-size-header-1)" align="center">
+                            {localize('New to trading?')}
+                        </NewHeader>
+                        <StyledHeader as="h5" align="center" weight="400" lh="2.4rem" mb="4rem">
+                            {localize(
+                                'Use our demo account and learn how to trade by using risk-free virtual funds.',
+                            )}
+                        </StyledHeader>
+                        <LinkButton secondary="true" to="/signup/">
+                            {localize('Create free demo account')}
+                        </LinkButton>
+                    </Flex>
+                </Container>
             </Section>
         </Layout>
     )

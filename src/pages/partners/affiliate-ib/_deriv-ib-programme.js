@@ -5,9 +5,9 @@ import { Table, TR, TC } from './_table.js'
 import { Card, CardWrapper } from './_partner-card.js'
 import { SectionContainer, Container } from 'components/containers'
 import { Header, Text } from 'components/elements/typography'
-import { localize } from 'components/localization'
+import { localize, Localize } from 'components/localization'
 import { Button, LinkButton } from 'components/form'
-import Partner from 'common/partner'
+import { affiliate_signup_url } from 'common/utility'
 import device from 'themes/device'
 import Chevron from 'images/svg/chevron-bottom-bold.svg'
 
@@ -30,7 +30,10 @@ const StyledHeader = styled(Header)`
 const BackButton = styled(Button)`
     border: 2px solid var(--color-grey-5);
     color: var(--color-black);
+    height: 40px;
+    padding: 0 1.6rem;
 `
+
 const StyledText = styled(Text)`
     font-size: 1.4rem;
     line-height: 1.15;
@@ -55,7 +58,7 @@ const ButtonWrapper = styled.div`
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 1.6rem 0 3.2rem 3.2rem;
+    padding: 1.6rem 3.2rem 3.2rem;
 
     button:last-child {
         margin-left: 1.6rem;
@@ -77,7 +80,7 @@ const StyledCard = styled(Card)`
 `
 
 const TitleTR = styled(TR)`
-    height: 5rem;
+    height: 6rem;
 `
 const DerivIBProgramme = () => {
     return (
@@ -109,7 +112,7 @@ const DerivIBProgramme = () => {
                         <StyledHeader as="h4" align="center" weight="500" mb="2.6rem">
                             {localize('Can’t decide which programme or commission plan suits you?')}
                         </StyledHeader>
-                        <LinkButton external secondary to="mailto:affiliates@deriv.com">
+                        <LinkButton external="true" secondary to="mailto:affiliates@deriv.com">
                             {localize('Contact us')}
                         </LinkButton>
                     </StyledSection>
@@ -131,6 +134,18 @@ const StyledTR = styled(TR)`
     display: ${(props) => (props.hidden ? 'hidden' : 'block')};
 `
 
+const SyntheticTable = styled(Table)`
+    grid-template-columns: 55% 47%;
+`
+const StyledLinkButton = styled(LinkButton)`
+    height: 40px;
+
+    @media ${device.mobileL} {
+        padding: 1.5rem 1.6rem;
+        height: 40px;
+        white-space: nowrap;
+    }
+`
 const DMT5Synthetic = ({ data }) => {
     const [is_expand, setExpand] = React.useState(false)
     const [is_calculated, setCalculated] = React.useState(false)
@@ -145,15 +160,15 @@ const DMT5Synthetic = ({ data }) => {
     }
     return (
         <Card
-            height={is_expand && !is_calculated ? '76rem' : '42rem'}
-            padding="3.2rem 3.2rem 8.2rem"
+            height={is_expand && !is_calculated ? '76rem' : '49rem'}
+            padding="3.2rem 1.6rem 8.2rem"
         >
             <div>
                 {!is_calculated ? (
-                    <>
+                    <div>
                         <Header as="h4">{data.name}</Header>
                         <Text>{data.description}</Text>
-                        <Table grid_col_number={data.assets.length} is_balance={true}>
+                        <SyntheticTable grid_col_number={data.assets.length} is_balance={true}>
                             {data.assets.map((asset, idx) => (
                                 <TC grid_area={`area${idx}`} key={idx}>
                                     {asset.map((item, idxa) => {
@@ -187,7 +202,7 @@ const DMT5Synthetic = ({ data }) => {
                                     })}
                                 </TC>
                             ))}
-                        </Table>
+                        </SyntheticTable>
                         {has_expansion && (
                             <StyledChevron onClick={toggleExpand} is_expand={is_expand} />
                         )}
@@ -196,7 +211,7 @@ const DMT5Synthetic = ({ data }) => {
                                 {localize("How it's calculated")}
                             </Button>
                         </HowItsCalculate>
-                    </>
+                    </div>
                 ) : (
                     <>
                         <Header as="h4" lh="1.5">
@@ -204,9 +219,15 @@ const DMT5Synthetic = ({ data }) => {
                         </Header>
                         {data.calculation}
                         <ButtonWrapper>
-                            <Button secondary onClick={Partner.redirectToSignup}>
+                            <StyledLinkButton
+                                secondary
+                                to={affiliate_signup_url}
+                                external
+                                target="_blank"
+                                is_affiliate_link
+                            >
                                 {localize('Become an affiliate')}
-                            </Button>
+                            </StyledLinkButton>
                             <BackButton tertiary onClick={toggleCalculated}>
                                 {localize('Back')}
                             </BackButton>
@@ -226,7 +247,7 @@ const DMT5Standard = ({ data }) => {
         <Card padding="3.2rem 3.2rem 8.2rem">
             <div>
                 {!is_calculated ? (
-                    <>
+                    <div>
                         <Header as="h4">{data.name}</Header>
                         <Text>{data.description}</Text>
                         <Table grid_col_number={data.assets.length}>
@@ -275,15 +296,21 @@ const DMT5Standard = ({ data }) => {
                                 {localize("How it's calculated")}
                             </Button>
                         </HowItsCalculate>
-                    </>
+                    </div>
                 ) : (
                     <>
                         <Header as="h4">{localize('How it’s calculated')}</Header>
                         {data.calculation}
                         <ButtonWrapper>
-                            <Button secondary onClick={Partner.redirectToSignup}>
+                            <StyledLinkButton
+                                secondary
+                                to={affiliate_signup_url}
+                                external
+                                target="_blank"
+                                is_affiliate_link
+                            >
                                 {localize('Become an affiliate')}
-                            </Button>
+                            </StyledLinkButton>
                             <BackButton tertiary onClick={toggleCalculated}>
                                 {localize('Back')}
                             </BackButton>
@@ -303,7 +330,7 @@ const DMT5Advanced = ({ data }) => {
         <StyledCard padding="3.2rem 3.2rem 8.2rem">
             <div>
                 {!is_calculated ? (
-                    <>
+                    <div>
                         <Header as="h4">{data.name}</Header>
                         <Text>{data.description}</Text>
                         <Table grid_col_number={data.assets.length}>
@@ -353,15 +380,21 @@ const DMT5Advanced = ({ data }) => {
                                 {localize("How it's calculated")}
                             </Button>
                         </HowItsCalculate>
-                    </>
+                    </div>
                 ) : (
                     <>
                         <Header as="h4">{localize('How it’s calculated')}</Header>
                         {data.calculation}
                         <ButtonWrapper>
-                            <Button secondary onClick={Partner.redirectToSignup}>
+                            <StyledLinkButton
+                                secondary
+                                to={affiliate_signup_url}
+                                external
+                                target="_blank"
+                                is_affiliate_link
+                            >
                                 {localize('Become an affiliate')}
-                            </Button>
+                            </StyledLinkButton>
                             <BackButton tertiary onClick={toggleCalculated}>
                                 {localize('Back')}
                             </BackButton>
@@ -373,104 +406,109 @@ const DMT5Advanced = ({ data }) => {
     )
 }
 const ib_dmt5_standard = {
-    name: localize('DMT5 Standard'),
-    description: localize('Earn when your clients trade on a DMT5 Standard account.'),
+    name: <Localize translate_text="DMT5 Financial" />,
+    description: (
+        <Localize translate_text="Earn when your clients trade on a DMT5 Financial account." />
+    ),
     assets: [
         [
-            { title: localize('Asset'), style: { minWidth: '13rem' } },
-            localize('Forex and metals'),
-            localize('Cryptocurrencies'),
+            { title: <Localize translate_text="Asset" />, style: { minWidth: '13rem' } },
+            <Localize key={0} translate_text="Forex and metals" />,
+            <Localize key={1} translate_text="Cryptocurrencies" />,
         ],
         [
-            { title: localize('Commission per round trade'), style: { maxWidth: '16rem' } },
-            localize('10 per lot'),
-            localize('0.3% per lot'),
+            {
+                title: <Localize translate_text="Commission per round trade" />,
+                style: { maxWidth: '16rem' },
+            },
+            <Localize key={0} translate_text="10 per lot" />,
+            <Localize key={1} translate_text="0.3% per lot" />,
         ],
     ],
     calculation: (
         <>
             <Text>
-                {localize(
-                    'For forex and metal assets, your commission is represented in the base currency. For example, a round trade (i.e. opening and closing a position) of 1 lot of EUR/USD will pay out EUR 10 in commission. A round trade of 1 lot of USD/CAD will pay out USD 10 in commission.',
-                )}
+                <Localize translate_text="For forex and metal assets, your commission is represented in the base currency. For example, a round trade (i.e. opening and closing a position) of 1 lot of EUR/USD will pay out EUR 10 in commission. A round trade of 1 lot of USD/CAD will pay out USD 10 in commission." />
             </Text>
             <Text mt="2rem">
-                {localize(
-                    'For cryptocurrency assets, a round trade of 1 lot of BTC/USD with a spot price of USD 10,000 will pay out USD 30 in commission.',
-                )}
+                <Localize translate_text="For cryptocurrency assets, a round trade of 1 lot of BTC/USD with a spot price of USD 10,000 will pay out USD 30 in commission." />
             </Text>
         </>
     ),
 }
 const ib_dmt5_advanced = {
-    name: localize('DMT5 Advanced'),
-    description: localize('Earn when your clients trade on a DMT5 Advanced account.'),
+    name: <Localize translate_text="DMT5 Financial STP" />,
+    description: (
+        <Localize translate_text="Earn when your clients trade on a DMT5 Financial STP account." />
+    ),
     assets: [
-        [{ title: localize('Asset'), style: { minWidth: '13rem' } }, localize('Forex and metals')],
         [
-            { title: localize('Commission per round trade'), style: { maxWidth: '16rem' } },
-            localize('5 per lot'),
+            { title: <Localize translate_text="Asset" />, style: { minWidth: '13rem' } },
+            localize('Forex and metals'),
+        ],
+        [
+            {
+                title: <Localize translate_text="Commission per round trade" />,
+                style: { maxWidth: '16rem' },
+            },
+            <Localize key={0} translate_text="5 per lot" />,
         ],
     ],
     calculation: (
         <Text>
-            {localize(
-                'For forex assets, your commission is represented in the base currency. For example, a round trade of 1 lot of EUR/USD will pay out EUR 5 in commission. A round trade of 1 lot of USD/CAD will pay out USD 5 in commission.',
-            )}
+            <Localize translate_text="For forex assets, your commission is represented in the base currency. For example, a round trade of 1 lot of EUR/USD will pay out EUR 5 in commission. A round trade of 1 lot of USD/CAD will pay out USD 5 in commission." />
         </Text>
     ),
 }
 const ib_dmt5_synthetic = {
-    name: localize('DMT5 Synthetic Indices'),
-    description: localize('Earn when your clients trade on a DMT5 Synthetic Indices account.'),
+    name: <Localize translate_text="DMT5 Synthetic" />,
+    description: (
+        <Localize translate_text="Earn when your clients trade on a DMT5 Synthetic account." />
+    ),
     assets: [
         [
-            localize('Asset'),
-            localize('Crash 500 Index'),
-            localize('Crash 1000 Index'),
-            localize('Boom 500 Index'),
-            localize('Boom 1000 Index'),
-            localize('Volatility 10 Index'),
-            localize('Volatility 25 Index'),
-            localize('Volatility 50 Index'),
-            localize('Volatility 75 Index'),
-            localize('Volatility 100 Index'),
-            localize('HF Volatility 10 Index'),
-            localize('HF Volatility 50 Index'),
-            localize('HF Volatility 100 Index'),
-            localize('Step Index'),
+            <Localize key={0} translate_text="Asset" />,
+            <Localize key={1} translate_text="Crash 500 Index" />,
+            <Localize key={2} translate_text="Crash 1000 Index" />,
+            <Localize key={3} translate_text="Boom 500 Index" />,
+            <Localize key={4} translate_text="Boom 1000 Index" />,
+            <Localize key={5} translate_text="Volatility 10 Index" />,
+            <Localize key={6} translate_text="Volatility 25 Index" />,
+            <Localize key={7} translate_text="Volatility 50 Index" />,
+            <Localize key={8} translate_text="Volatility 75 Index" />,
+            <Localize key={9} translate_text="Volatility 100 Index" />,
+            <Localize key={10} translate_text="HF Volatility 10 Index" />,
+            <Localize key={11} translate_text="HF Volatility 50 Index" />,
+            <Localize key={12} translate_text="HF Volatility 100 Index" />,
+            <Localize key={13} translate_text="Step Index" />,
         ],
         [
-            localize('Commission per round trade (per USD 100k)'),
-            localize('0.30'),
-            localize('0.20'),
-            localize('0.30'),
-            localize('0.20'),
-            localize('1.50'),
-            localize('3.50'),
-            localize('7.50'),
-            localize('10.00'),
-            localize('15.00'),
-            localize('1.50'),
-            localize('7.50'),
-            localize('15.00'),
-            localize('0.20'),
+            <Localize key={0} translate_text="Commission per round trade (per USD 100k)" />,
+            '0.30',
+            '0.20',
+            '0.30',
+            '0.20',
+            '1.50',
+            '3.50',
+            '7.50',
+            '10.00',
+            '15.00',
+            '1.50',
+            '7.50',
+            '15.00',
+            '0.20',
         ],
     ],
     calculation: (
         <>
             <Text>
-                {localize(
-                    'For example, a round trade of 1 lot of the Volatility 75 Index for a price of USD 125,000 would pay out USD 12.5 in commission based on the following formula: ',
-                )}
+                <Localize translate_text="For example, a round trade of 1 lot of the Volatility 75 Index for a price of USD 125,000 would pay out USD 12.5 in commission based on the following formula:" />
             </Text>
             <Text weight="bold" m="2.5rem 0">
-                {localize('USD 10 X 1 lot X USD 125,000 / 100,000 = USD 12.5')}
+                <Localize translate_text="USD 10 X 1 lot X USD 125,000 / 100,000 = USD 12.5" />
             </Text>
             <StyledText size="var(--text-size-s)" lh="1.5">
-                {localize(
-                    'If your account currency is in euro or pound sterling, your commission will be converted based on the latest exchange rate.',
-                )}
+                <Localize translate_text="If your account currency is in euro or pound sterling, your commission will be converted based on the latest exchange rate." />
             </StyledText>
         </>
     ),

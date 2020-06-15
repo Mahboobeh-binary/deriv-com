@@ -20,9 +20,9 @@ const StyledSideTab = styled(Box)`
     }
 `
 const TabList = styled.ol`
-    width: ${props => props.tab_width || '38.4rem'};
+    width: ${(props) => props.tab_width || '38.4rem'};
     list-style: none;
-    ${props =>
+    ${(props) =>
         props.is_sticky &&
         css`
             position: sticky;
@@ -51,7 +51,7 @@ const StyledTab = styled.li`
     & > p {
         color: var(--color-black-3);
         opacity: 0.32;
-        font-size: ${props => props.font_size || 'var(--text-size-s)'};
+        font-size: ${(props) => props.font_size || 'var(--text-size-s)'};
         max-width: 38.4rem;
         line-height: 30px;
 
@@ -75,13 +75,17 @@ const StyledDropDown = styled.li`
     border-bottom: 1px solid var(--color-red);
     display: flex;
     justify-content: space-between;
+    align-items: center;
 
     ${Text} {
         ${TabsText}
     }
 `
 const ChevronWrapper = styled(Chevron)`
-    transform: ${props => (props.active_tab === '-' ? 'rotate(0deg)' : 'rotate(180deg)')};
+    min-width: 16px;
+    width: 16px;
+    height: 16px;
+    transform: ${(props) => (props.active_tab === '-' ? 'rotate(0deg)' : 'rotate(180deg)')};
 `
 const ItemWrapper = styled.div`
     display: flex;
@@ -132,11 +136,11 @@ const SideTab = ({ children, has_hash_routing, is_sticky, onTabChange, tab_heade
             setTab(new_tab)
         })
     }
-    const current_active_tab = children.find(child => child.props.label === active_tab)
+    const current_active_tab = children.find((child) => child.props.label === active_tab)
 
     if (onTabChange) onTabChange(current_active_tab)
 
-    const Tabs = props => {
+    const Tabs = (props) => {
         return children.map((child, idx) => {
             const { label, text, onClick } = child.props
             return (
@@ -145,7 +149,7 @@ const SideTab = ({ children, has_hash_routing, is_sticky, onTabChange, tab_heade
                         font_size={font_size}
                         mobile={props.is_mobile}
                         text={text}
-                        onClick={e => {
+                        onClick={(e) => {
                             if (onClick) {
                                 onClick(e)
                             }
@@ -186,7 +190,7 @@ const SideTab = ({ children, has_hash_routing, is_sticky, onTabChange, tab_heade
                 </Mobile>
             </TabList>
             <TabContent>
-                {children.map(child => (child.props.label === active_tab ? child : undefined))}
+                {children.map((child) => (child.props.label === active_tab ? child : undefined))}
             </TabContent>
         </StyledSideTab>
     )
@@ -196,7 +200,7 @@ const useTabs = (initial_active_tab = '', has_hash_routing) => {
     const [active_tab, setActiveTab] = useState(initial_active_tab)
     const [previous_tab, setLastActiveTab] = useState('-')
 
-    const setTab = tab => {
+    const setTab = (tab) => {
         if (tab === active_tab) return
         setActiveTab(tab)
 

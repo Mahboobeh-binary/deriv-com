@@ -16,6 +16,7 @@ export const CardStyle = css`
 `
 
 const CardContent = styled(Text)`
+    font-size: var(--text-size-xs);
     margin-top: 0.5rem;
     line-height: 1.25;
 
@@ -57,6 +58,7 @@ const CardWrapper = styled.article`
     ${CardStyle}
     position: relative;
     overflow: hidden;
+    height: 100%;
     min-height: ${(props) => (props.min_height ? props.min_height : '0')};
     width: ${(props) => (props.width ? props.width : '38.4rem')};
     padding: ${(props) => (props.padding ? props.padding : '1.8rem 2rem 1.4rem 1.2rem')};
@@ -124,18 +126,8 @@ const CardChildrenWrapper = styled.article`
 
 const IconContainer = styled.div`
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
 
-    svg {
-        width: 8.25rem;
-        height: 8.25rem;
-    }
-    div {
-        svg {
-            width: 7.2rem;
-            height: 7.2rem;
-        }
-    }
     ${Header} {
         display: flex;
         align-items: center;
@@ -154,12 +146,20 @@ const Content = ({ content }) => (
     </>
 )
 
+const IconWrapper = styled.div`
+    & > svg {
+        width: 7.9rem;
+        height: 7.9rem;
+    }
+`
+
 Content.propTypes = {
     content: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 }
 
 export const Card = ({
     children,
+    className,
     Icon,
     title,
     content,
@@ -173,7 +173,7 @@ export const Card = ({
     word_break_cover,
 }) => {
     return (
-        <CardWrapper width={width} min_height={min_height} padding={padding}>
+        <CardWrapper width={width} min_height={min_height} padding={padding} className={className}>
             {!children && (
                 <>
                     {is_inline_icon ? (
@@ -195,9 +195,9 @@ export const Card = ({
                                 </div>
                             </CardCover>
                             <IconContainer>
-                                <div>
+                                <IconWrapper>
                                     <Icon />
-                                </div>
+                                </IconWrapper>
                                 <CardContentContainer>
                                     <Header as="h4" weight="bold">
                                         {title}
@@ -226,6 +226,7 @@ export const Card = ({
 
 Card.propTypes = {
     children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]),
+    className: PropTypes.string,
     content: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
     cover_background: PropTypes.string,
     cover_content: PropTypes.string,
@@ -291,6 +292,16 @@ const ResponsiveText = styled(Text)`
 `
 
 const FlexHover = styled(Flex)`
+    & > svg {
+        width: 24px;
+        height: 24px;
+        margin-right: 1.6rem;
+
+        @media ${device.mobileL} {
+            width: 30px;
+            height: 30px;
+        }
+    }
     &:hover {
         ${RightDiagonal} {
             opacity: 1;
@@ -300,12 +311,18 @@ const FlexHover = styled(Flex)`
         }
     }
 `
-export const NavCard = ({ icon, title, content, to, style, external, target, className }) => {
-    const NavIcon = styled(icon)`
-        width: 24px;
-        height: 24px;
-        margin-right: 1.6rem;
-    `
+export const NavCard = ({
+    icon: Icon,
+    title,
+    content,
+    to,
+    style,
+    external,
+    target,
+    className,
+    is_binary_link,
+    otherLinkProps,
+}) => {
     return (
         <LocalizedLink
             to={to}
@@ -319,9 +336,11 @@ export const NavCard = ({ icon, title, content, to, style, external, target, cla
             external={external}
             target={target}
             className={className}
+            is_binary_link={is_binary_link}
+            {...otherLinkProps}
         >
             <FlexHover jc="flex-start" direction="row" tablet_direction="row">
-                <NavIcon />
+                <Icon />
                 <NavContent>
                     <ResponsiveHeader size="var(--text-size-xs)" lh="1.14" mb="0.8rem">
                         {title}
@@ -340,12 +359,14 @@ export const NavCard = ({ icon, title, content, to, style, external, target, cla
 
 NavCard.propTypes = {
     className: PropTypes.string,
-    content: PropTypes.string,
+    content: PropTypes.oneOfType([PropTypes.string, PropTypes.array, PropTypes.object]),
     external: PropTypes.string,
     icon: PropTypes.func,
+    is_binary_link: PropTypes.bool,
+    otherLinkProps: PropTypes.object,
     style: PropTypes.object,
     target: PropTypes.string,
-    title: PropTypes.string,
+    title: PropTypes.PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     to: PropTypes.string,
 }
 

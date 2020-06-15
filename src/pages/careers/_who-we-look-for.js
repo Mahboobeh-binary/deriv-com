@@ -45,7 +45,7 @@ const DescContainer = styled(Flex)`
 `
 
 const ImageDescription = styled.div`
-    ${props =>
+    ${(props) =>
         props.left
             ? css`
                   margin-right: 6.4rem;
@@ -67,7 +67,7 @@ const BoldSpan = styled.span`
 `
 
 const DescText = styled(ParimaryText)`
-    max-width: ${props => (props.max_width ? props.max_width : '38rem')};
+    max-width: ${(props) => (props.max_width ? props.max_width : '38rem')};
     margin-bottom: 3.2rem;
 
     &:last-child {
@@ -81,18 +81,18 @@ const ImageWrapper = styled.div`
 `
 const query = graphql`
     query {
-        teamfocus: file(relativePath: { eq: "careers/team-focus.png" }) {
+        teamfocus: file(relativePath: { eq: "careers/team-focus.jpg" }) {
             childImageSharp {
-                fluid(maxWidth: 650, srcSetBreakpoints: [400, 600, 960, 1280, 1920]) {
-                    ...GatsbyImageSharpFluid_withWebp_noBase64
+                fluid(maxWidth: 650) {
+                    ...GatsbyImageSharpFluid_withWebp
                     originalName
                 }
             }
         }
-        peopleeating: file(relativePath: { eq: "careers/people-eating.png" }) {
+        peopleeating: file(relativePath: { eq: "careers/people-eating.jpg" }) {
             childImageSharp {
-                fluid(maxWidth: 650, srcSetBreakpoints: [400, 600, 960, 1280, 1920]) {
-                    ...GatsbyImageSharpFluid_withWebp_noBase64
+                fluid(maxWidth: 650) {
+                    ...GatsbyImageSharpFluid_withWebp
                     originalName
                 }
             }

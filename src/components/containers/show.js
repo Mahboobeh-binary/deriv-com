@@ -1,47 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
-import Cookies from 'js-cookie'
+import { LocationContext } from '../layout/location-context'
 import { size } from 'themes/device'
-import { isEuCountry } from 'common/country-base'
-
-const handleEu = (setVisible, to) => is_eu_country => {
-    switch (to) {
-        case 'eu':
-            setVisible(is_eu_country)
-            break
-        case 'non-eu':
-            setVisible(!is_eu_country)
-            break
-        default:
-            break
-    }
-}
-
-const Location = ({ children, to }) => {
-    const [visible, setVisible] = useState(false)
-    useEffect(() => {
-        if (!to) return
-
-        const clients_country = Cookies.get('clients_country')
-        const showEu = handleEu(setVisible, to)
-        showEu(isEuCountry(clients_country))
-    })
-    return visible ? <>{children}</> : null
-}
-
-export const Eu = props => <Location {...props} to="eu" />
-
-export const NonEu = props => <Location {...props} to="non-eu" />
 
 const MaxWidth = styled.div`
-    @media (max-width: ${props => props.max_width}px) {
+    @media (max-width: ${(props) => props.max_width}px) {
         display: none !important;
     }
 `
 
 const MinWidth = styled.div`
-    @media (min-width: ${props => props.min_width}px) {
+    @media (min-width: ${(props) => props.min_width}px) {
         display: none !important;
     }
 `
@@ -57,16 +27,24 @@ export const Mobile = ({ children, ...props }) => (
     </MinWidth>
 )
 
-export default {
-    Eu,
-    NonEu,
-    Mobile,
-    Desktop,
+export const Eu = ({ children }) => {
+    const { is_eu_country } = React.useContext(LocationContext)
+
+    if (is_eu_country) return <>{children}</>
+    else return null
 }
 
-Location.propTypes = {
-    children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]),
-    to: PropTypes.oneOf(['eu', 'non-eu']),
+export const NonEU = ({ children }) => {
+    const { is_eu_country } = React.useContext(LocationContext)
+
+    if (is_eu_country === false) return <>{children}</>
+    else return null
+}
+
+export default {
+    Eu,
+    Mobile,
+    Desktop,
 }
 
 Desktop.propTypes = {

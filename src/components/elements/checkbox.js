@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
+import device from 'themes/device.js'
 
 const CheckboxContainer = styled.div`
     display: inline-block;
@@ -9,7 +10,7 @@ const CheckboxContainer = styled.div`
 
 const Icon = styled.svg`
     fill: none;
-    stroke: ${props => {
+    stroke: ${(props) => {
         if (props.secondary) return 'var(--color-white)'
         return 'var(--color-black)'
     }};
@@ -26,11 +27,11 @@ const StyledCheckbox = styled.div`
     display: inline-block;
     width: 1.6rem;
     height: 1.6rem;
-    background: ${props => {
+    background: ${(props) => {
         if (props.secondary && props.checked) return 'var(--color-red)'
         return 'var(--color-white)'
     }};
-    border: ${props => {
+    border: ${(props) => {
         if (props.secondary && props.checked) return '2px solid var(--color-red)'
         return '2px solid var(--color-grey-5)'
     }};
@@ -38,7 +39,12 @@ const StyledCheckbox = styled.div`
     margin-right: 0.8rem;
 
     ${Icon} {
-        visibility: ${props => (props.checked ? 'visible' : 'hidden')};
+        visibility: ${(props) => (props.checked ? 'visible' : 'hidden')};
+    }
+
+    @media ${device.mobileL} {
+        width: 2rem;
+        height: 2rem;
     }
 `
 

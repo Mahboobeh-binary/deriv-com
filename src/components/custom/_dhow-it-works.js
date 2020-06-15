@@ -9,7 +9,7 @@ import device from 'themes/device.js'
 const StyledHeader = styled(Header)`
     @media ${device.tabletL} {
         text-align: left;
-        ${props =>
+        ${(props) =>
             props.as === 'h4' ? 'font-size: var(--text-size-sm);' : 'font-size: var(--text-size-l)'}
     }
 `
@@ -21,7 +21,7 @@ const DHowItWorks = ({ Video, title }) => {
                 <StyledHeader as="h4" align="center" weight="500">
                     {localize('How it works')}
                 </StyledHeader>
-                <StyledHeader as="h2" align="center" size="var(--text-size-header-1)" mt="0.8rem">
+                <StyledHeader as="h2" align="center" size="var(--text-size-l)" mt="0.9rem">
                     {title}
                 </StyledHeader>
                 <Video />

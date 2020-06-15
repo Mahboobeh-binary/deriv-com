@@ -1,10 +1,10 @@
 import React from 'react'
 import styled from 'styled-components'
-import { getLanguage } from '../../common/utility'
 import { Article } from './_article'
 import { deriv_app_url } from 'common/utility'
-import { Text, Header } from 'components/elements/typography'
+import { Text, Header, LocalizedLinkText } from 'components/elements/typography'
 import { Localize, localize, WithIntl } from 'components/localization'
+import device from 'themes/device'
 
 const ArticleWrapper = styled.div`
     max-width: 71.2rem;
@@ -15,6 +15,11 @@ const ArticleWrapper = styled.div`
     font-size: var(--text-size-s);
     line-height: 1.5;
     margin-left: 12.6rem;
+    margin-top: 1.6rem;
+
+    @media ${device.tabletL} {
+        margin-left: 0;
+    }
 `
 const ExternalLink = styled.a`
     text-decoration: none;
@@ -32,10 +37,6 @@ const StyledText = styled(Text)`
 const StyledHeader = styled(Header)`
     margin-bottom: 2.4rem;
 `
-const urlPaymentMethods =
-    getLanguage() === 'en' || getLanguage() == null
-        ? '/payment-methods/'
-        : `/${getLanguage()}/payment-methods/`
 
 const PaymentMethods = () => (
     <ArticleWrapper>
@@ -44,8 +45,8 @@ const PaymentMethods = () => (
             <Localize
                 translate_text="Our list of <0>supported payment methods</0> includes bank wire, credit and debit cards, e-wallets, and cryptocurrencies."
                 components={[
-                    <ExternalLink
-                        href={urlPaymentMethods}
+                    <LocalizedLinkText
+                        to="/payment-methods/"
                         target="_blank"
                         rel="noopener noreferrer"
                         key={0}
@@ -155,7 +156,7 @@ const WithdrawMaestroMastercard = () => (
 
 const DepositsAndWithdrawalArticle = () => {
     return (
-        <Article header="Deposits and withdrawals">
+        <Article header={localize('Deposits and withdrawals')}>
             <PaymentMethods
                 text={localize('What payment methods do you support?')}
                 label="payment-methods"

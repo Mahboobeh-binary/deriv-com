@@ -29,7 +29,7 @@ const Bounce = keyframes`
 export const StyledCard = styled(LocalizedLink)`
     text-decoration: none;
     position: relative;
-    height: ${props => (props.height ? props.height : 'auto')};
+    height: ${(props) => (props.height ? props.height : 'auto')};
     width: 100%;
     box-shadow: 0 16px 20px 0 rgba(0, 0, 0, 0.05), 0 0 20px 0 rgba(0, 0, 0, 0.05);
     border-radius: 4px;
@@ -53,7 +53,7 @@ export const StyledCard = styled(LocalizedLink)`
 
 export const NormalCard = styled.article`
     position: relative;
-    height: ${props => (props.height ? props.height : 'auto')};
+    height: ${(props) => (props.height ? props.height : 'auto')};
     width: 100%;
     box-shadow: 0 16px 20px 0 rgba(0, 0, 0, 0.05), 0 0 20px 0 rgba(0, 0, 0, 0.05);
     border-radius: 4px;
@@ -61,7 +61,7 @@ export const NormalCard = styled.article`
 `
 
 const ImageWrapper = styled.div`
-    height: 14.4rem;
+    height: 144px;
     width: 100%;
 `
 
@@ -82,11 +82,11 @@ const StyledLink = styled.div`
 `
 
 const TeamCard = ({ to, img_data, display_team_name, tagline }) => (
-    <StyledCard height="38.8rem" to={to}>
+    <StyledCard height="388px" to={to}>
         <ImageWrapper>
             <QueryImage
                 data={img_data}
-                height="14.4rem"
+                height="144px"
                 width="100%"
                 alt={localize('Team ') + display_team_name}
             />

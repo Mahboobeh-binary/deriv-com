@@ -3,9 +3,10 @@ import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import PlatformVideoMp4 from './Deriv_platform_tour.mp4'
 import device from 'themes/device'
-import { LinkButton, Button } from 'components/form'
 import { Container, Show, Flex } from 'components/containers'
 import { Header, Text } from 'components/elements'
+import { LinkButton, Button } from 'components/form'
+import { useLazyVideo } from 'components/hooks/lazy-video'
 import { localize } from 'components/localization'
 import CheckMarkIcon from 'images/svg/checklist.svg'
 
@@ -16,8 +17,7 @@ const CheckMark = styled(CheckMarkIcon)`
 
 const HeroWrapper = styled.section`
     width: 100%;
-    padding-top: 27rem;
-    min-height: calc(100vh - 7rem);
+    min-height: auto;
     background: var(--color-black);
     position: relative;
     overflow: hidden;
@@ -25,7 +25,6 @@ const HeroWrapper = styled.section`
     @media ${device.laptop} {
         background-position: -10rem 100%;
         padding-top: 7rem;
-        padding-bottom: 7rem;
     }
     @media ${device.tabletL} {
         background: unset;
@@ -55,10 +54,14 @@ const HeroSubHeader = styled(Header)`
 `
 
 const StyledArticle = styled.article`
-    position: relative;
+    position: absolute;
+    top: 21.8rem;
     z-index: 2;
     margin-left: 18%;
 
+    @media ${device.laptopM} {
+        top: 10.8rem;
+    }
     @media ${device.tabletL} {
         margin: 0 2rem;
         height: 100%;
@@ -71,6 +74,7 @@ const StyledArticle = styled.article`
 const HeroGrid = styled.section`
     width: 100%;
     max-width: 100%;
+    max-height: 82.7rem;
     position: absolute;
     top: 0;
     right: 0;
@@ -88,7 +92,7 @@ const HeroGrid = styled.section`
 `
 
 const ButtonWrapper = styled(Flex)`
-    margin-top: 6rem;
+    margin-top: 9.6rem;
     height: 40px;
 
     ${Button} {
@@ -103,8 +107,8 @@ const ButtonWrapper = styled(Flex)`
 `
 
 const StyledVideo = styled.video`
-    position: absolute;
     opacity: 0.5;
+    max-height: 82.7rem;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -145,7 +149,7 @@ const CheckMarkBullet = ({ children }) => (
     <li>
         <Flex jc="unset" ai="center">
             <CheckMark />
-            <CheckBoxText ml="1.6rem" size="1.8rem" weight="500" lh="2" color="white">
+            <CheckBoxText ml="1rem" size="2.4rem" lh="1.5" color="white">
                 {children}
             </CheckBoxText>
         </Flex>
@@ -169,6 +173,8 @@ CheckMarkBullet.propTypes = {
 }
 
 export const Hero = () => {
+    useLazyVideo()
+
     return (
         <HeroWrapper>
             <Container>
@@ -178,9 +184,9 @@ export const Hero = () => {
                             <HeroHeader
                                 as="h1"
                                 color="white"
-                                mb="3.2rem"
+                                mb="2.4rem"
                                 size="var(--text-size-xl)"
-                                lh="1.15"
+                                lh="1.25"
                             >
                                 {localize('Simple. Flexible. Reliable.')}
                             </HeroHeader>
@@ -191,7 +197,7 @@ export const Hero = () => {
                                 weight="500"
                                 mb="1.4rem"
                             >
-                                {localize('Trade forex, commodities, stock and synthetic indices')}
+                                {localize('Trade forex, commodities, synthetic and stock indices')}
                             </HeroSubHeader>
                             <CheckMarkList>
                                 <CheckMarkBullet>
@@ -208,7 +214,7 @@ export const Hero = () => {
                         <div>
                             <ButtonWrapper jc="unset">
                                 <HeroButton type="submit" secondary="true" to="/signup/">
-                                    {localize('Create demo account')}
+                                    {localize('Create free demo account')}
                                 </HeroButton>
                             </ButtonWrapper>
                         </div>
@@ -217,6 +223,7 @@ export const Hero = () => {
             </Container>
             <Show.Desktop>
                 <StyledVideo
+                    className="lazy"
                     title={localize('deriv.app platform video')}
                     width="100%"
                     height="100%"
@@ -225,7 +232,7 @@ export const Hero = () => {
                     playsInline
                     loop
                 >
-                    <source src={PlatformVideoMp4} type="video/mp4" />
+                    <source data-src={PlatformVideoMp4} type="video/mp4" />
                 </StyledVideo>
             </Show.Desktop>
         </HeroWrapper>

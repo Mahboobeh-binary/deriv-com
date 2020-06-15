@@ -4,6 +4,7 @@ import PartnerVideo from './partner-video.mp4'
 import { localize } from 'components/localization'
 import { Container } from 'components/containers'
 import { Header } from 'components/elements'
+import { useLazyVideo } from 'components/hooks/lazy-video'
 
 const StyledHero = styled.div`
     width: 100%;
@@ -38,9 +39,12 @@ const Content = styled.div`
 `
 
 const Hero = () => {
+    useLazyVideo()
+
     return (
         <StyledHero>
             <StyledVideo
+                className="lazy"
                 title={localize('deriv.app platform video')}
                 width="100%"
                 height="100%"
@@ -49,15 +53,15 @@ const Hero = () => {
                 playsInline
                 loop
             >
-                <source src={PartnerVideo} type="video/mp4" />
+                <source data-src={PartnerVideo} type="video/mp4" />
             </StyledVideo>
             <Content direction="column">
                 <Container direction="column" height="100%">
                     <Header as="h1" color="white" align="center">
-                        Deriv partnership programmes
+                        {localize('Deriv partnership programmes')}
                     </Header>
                     <Header color="white" align="center" size="var(--text-size-header-1)">
-                        Partner with a trusted online trading provider.
+                        {localize('Partner with a trusted online trading provider.')}
                     </Header>
                 </Container>
             </Content>

@@ -22,18 +22,15 @@ const ButtonContainer = styled.div`
 `
 
 const InputGroup = styled.div`
-    margin-bottom: 3.4rem;
+    width: 40rem;
+    margin: 0 auto 3.4rem;
 `
 
 const StyledButton = styled(Button)`
-    margin: 0 0.4rem;
+    margin: 0.8rem 0.4rem;
 `
 
-const StyledForm = styled(Form)`
-    width: 40rem;
-`
-
-const resetValidation = values => {
+const resetValidation = (values) => {
     let errors = {}
 
     const email_error = validation.email(values.email)
@@ -46,10 +43,13 @@ const resetValidation = values => {
 }
 
 const resetSubmission = (values, actions) => {
-    BinarySocketBase.send({
-        verify_email: values.email,
-        type: 'reset_password',
-    }).then(response => {
+    const binary_socket = BinarySocketBase.init()
+
+    binary_socket.onopen = () => {
+        binary_socket.send(JSON.stringify({ verify_email: values.email, type: 'reset_password' }))
+    }
+    binary_socket.onmessage = (msg) => {
+        const response = JSON.parse(msg.data)
         actions.setSubmitting(false)
         if (response.error) {
             actions.setStatus({
@@ -64,7 +64,8 @@ const resetSubmission = (values, actions) => {
                 'Please check your email and click on the link provided to reset your password.',
             ),
         })
-    })
+        binary_socket.close()
+    }
 }
 
 const ResetPassword = () => (
@@ -98,7 +99,7 @@ const ResetPassword = () => (
                     resetForm,
                     status,
                 }) => (
-                    <StyledForm noValidate>
+                    <Form noValidate>
                         <InputGroup>
                             <Input
                                 id="email"
@@ -131,7 +132,7 @@ const ResetPassword = () => (
                                 {localize('Reset my password')}
                             </StyledButton>
                         </ButtonContainer>
-                    </StyledForm>
+                    </Form>
                 )}
             </Formik>
         </StyledContainer>
